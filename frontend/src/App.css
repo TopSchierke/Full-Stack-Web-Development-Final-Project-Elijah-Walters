@@ -1,0 +1,13 @@
+body {
+  background: whitesmoke;
+}
+
+.card {
+  border-radius: 12px;
+  background: antiquewhite;
+}
+
+h2 {
+  font-weight: 700;
+}
+
