@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 const API = "http://localhost/shopping/backend";
-//ChatGPT helped with some of the bootstrap
+
 export default function App() {
   const [stores, setStores] = useState([]);
   const [newStore, setNewStore] = useState("");
@@ -190,15 +190,15 @@ export default function App() {
               </span>
 
               <small className="text-muted ms-2">
-                : {item.store_name}
+                Store: {item.store_name}  | Date Added: {new Date(item.created_at).toLocaleDateString()}
               </small>
             </div>
 
             <button
-              className="btn btn-sm btn-outline-danger"
+              className="btn btn-outline-danger"
               onClick={() => deleteItem(item.id)}
             >
-              Delete
+              Remove
             </button>
           </div>
         ))}

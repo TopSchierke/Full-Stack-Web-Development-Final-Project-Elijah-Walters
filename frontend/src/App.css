@@ -1,10 +1,23 @@
 body {
-  background: whitesmoke;
+  background-color: #f8f1d4;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 31px,
+      rgba(0, 0, 255, 0.2) 32px
+    );
 }
 
 .card {
-  border-radius: 12px;
-  background: antiquewhite;
+  background-color: #f8f1d4;
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 31px,
+      rgba(0, 0, 255, 0.2) 32px
+    );
 }
 
 h2 {

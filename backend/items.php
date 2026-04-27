@@ -15,10 +15,11 @@ $method = $_SERVER['REQUEST_METHOD'];
 if ($method === 'GET') {
 
     $stmt = $database->query("
-        SELECT items.*, stores.name AS store_name
-        FROM items
-        JOIN stores ON items.store_id = stores.id 
-        ORDER BY stores.name, items.created_at DESC");
+    SELECT items.*, stores.name AS store_name
+    FROM items
+    JOIN stores ON items.store_id = stores.id
+    ORDER BY stores.name ASC, items.created_at DESC
+        ");
     
 
     echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
