@@ -1,23 +1,13 @@
 body {
   background-color: #f8f1d4;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 31px,
-      rgba(0, 0, 255, 0.2) 32px
-    );
+  background-image: repeating-linear-gradient(to bottom, transparent, transparent 31px, rgba(0, 0, 255, 0.2) 32px);
 }
 
 .card {
   background-color: #f8f1d4;
-  background-image:
-    repeating-linear-gradient(
-      to bottom,
-      transparent,
-      transparent 31px,
-      rgba(0, 0, 255, 0.2) 32px
-    );
+  border-radius: 2px;
+  border-width: 2px;
+  border-color: gray;
 }
 
 h2 {

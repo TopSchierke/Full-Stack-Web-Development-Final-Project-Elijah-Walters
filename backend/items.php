@@ -1,19 +1,19 @@
 <?php
 require_once "database.php";
-
+//headers for react
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, DELETE, PUT, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
-
+//options check
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
-
+//GET POST PUT and DELETE
 if ($method === 'GET') {
-
+    //This pulls items from the db and sorts them by what store they are from and when they were created
     $stmt = $database->query("
     SELECT items.*, stores.name AS store_name
     FROM items
@@ -22,7 +22,7 @@ if ($method === 'GET') {
         ");
     
 
-    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+    echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));//fetch to json send to react
     exit;
 }
 
@@ -36,13 +36,21 @@ if ($method === 'POST') {
     $store_id = $_GET['store_id'];
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (!isset($data['name']) || trim($data['name']) === '') {
+    if (!isset($data['name']) || trim($data['name']) === '') { //checks the item input exists and isnt empty
         http_response_code(400);
         echo json_encode(["error" => "Item name required"]);
         exit;
     }
 
-    $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 1;
+    if (isset($data['quantity'])) {//checks that there was a quantity sent if not sets it to 1
+        $quantity = (int)$data['quantity'];
+        
+        if ($quantity == 0){ //cant buy 0 of something
+            $quantity = 1;
+        }
+    } else {
+        $quantity = 1;
+    }
 
     $stmt = $database->prepare("
         INSERT INTO items (store_id, name, quantity)
@@ -67,14 +75,15 @@ if ($method === 'PUT') {
     $name = $data['name'] ?? '';
     $quantity = isset($data['quantity']) ? (int)$data['quantity'] : 1;
     $checked = isset($data['checked']) ? (int)$data['checked'] : 0;
+    $store_id = isset($data['store_id']) ? (int)$data['store_id'] : null;
 
     $stmt = $database->prepare("
         UPDATE items 
-        SET name = ?, quantity = ?, checked = ?
+        SET name = ?, quantity = ?, checked = ?, store_id = ?
         WHERE id = ?
     ");
 
-    $stmt->execute([$name, $quantity, $checked, $id]);
+    $stmt->execute([$name, $quantity, $checked, $store_id, $id]);
 
     echo json_encode(["success" => true]);
     exit;
