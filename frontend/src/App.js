@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost/shopping/backend";//backend address
+const API = "http://localhost/shopping/backend/api/index.php";//backend address
 
 export default function App() {
     //initialize varliables
@@ -15,13 +15,13 @@ export default function App() {
     const [editItem, setEditItem] = useState(null);
     //fetches the stores from the backend api and sets them. async for await fetch
     const loadStores = async () => {
-        const res = await fetch(`${API}/stores.php`);
+        const res = await fetch(`${API}?route=stores`);
         setStores(await res.json());
     };
     
     //same as stores
     const loadItems = async () => {
-        const res = await fetch(`${API}/items.php`);
+        const res = await fetch(`${API}?route=items`);
         setItems(await res.json());
     };
 
@@ -35,7 +35,7 @@ export default function App() {
     const createStore = async () => {
         if (!newStore.trim()) return;//stores cant be made with no input or empty spaces
 
-        await fetch(`${API}/stores.php`, {//sends the request to the backend
+        await fetch(`${API}?route=stores`, {//sends the request to the backend
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ name: newStore }),
@@ -46,7 +46,7 @@ export default function App() {
     };
 
     const deleteStore = async (id) => {
-        await fetch(`${API}/stores.php?id=${id}`, {//deletes the store with the same id
+        await fetch(`${API}?route=stores&id=${id}`, {//deletes the store with the same id
             method: "DELETE",
         });
 
@@ -59,7 +59,7 @@ export default function App() {
     const createItem = async () => {
         if (!itemName.trim()) return;//if item attempted to be created doesnt have a name return
 
-        await fetch(`${API}/items.php?store_id=${selectedStore}`, {//id in url goes to backend to be posted
+        await fetch(`${API}?route=items&store_id=${selectedStore}`, {//id in url goes to backend to be posted
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -82,7 +82,7 @@ export default function App() {
             newChecked = 1;
         }
 
-        await fetch(`${API}/items.php?id=${item.id}`, {//uses fetch to put the edited item
+        await fetch(`${API}?route=items&id=${item.id}`, {//uses fetch to put the edited item
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -97,7 +97,7 @@ export default function App() {
     };
 
     const deleteItem = async (id) => {//deletes item with the correct id
-        await fetch(`${API}/items.php?id=${id}`, {
+        await fetch(`${API}?route=items&id=${id}`, {
             method: "DELETE",
         });
 
@@ -118,7 +118,7 @@ export default function App() {
     };
     
     const saveEdit = async () => {//when edits are done the item edits are put and saved over the original
-        await fetch(`${API}/items.php?id=${editItem.id}`, {
+        await fetch(`${API}?route=items&id=${editItem.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -168,7 +168,7 @@ export default function App() {
 
                         <input className="form-control" placeholder="Item name" value={itemName} onChange={(e) => setItemName(e.target.value)}/>
 
-                        <input type="number" className="form-control" value={itemQty} onChange={(e) => setItemQty(e.target.value)} style={{ maxWidth: "100px" }}/>
+                        <input type="number" className="form-control" value={itemQty} onChange={(e) => setItemQty(Number(e.target.value))} style={{ maxWidth: "100px" }}/>
 
                         <button className="btn btn-success" onClick={createItem}>Add</button>
                         </div>
