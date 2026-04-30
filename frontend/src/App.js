@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 
-const API = "http://localhost/shopping/backend";
+const API = "http://localhost/shopping/backend";//backend address
 
 export default function App() {
+    //initialize varliables
     const [stores, setStores] = useState([]);
     const [newStore, setNewStore] = useState("");
     const [selectedStore, setSelectedStore] = useState("");
@@ -12,100 +13,98 @@ export default function App() {
     const [itemQty, setItemQty] = useState(1);
 
     const [editItem, setEditItem] = useState(null);
-
+    //fetches the stores from the backend api and sets them. async for await fetch
     const loadStores = async () => {
         const res = await fetch(`${API}/stores.php`);
         setStores(await res.json());
     };
-
+    
+    //same as stores
     const loadItems = async () => {
         const res = await fetch(`${API}/items.php`);
         setItems(await res.json());
     };
 
+    //on page load, loads all stores as well as loads all items to the shopping list
     useEffect(() => {
-      loadStores();
-      loadItems();
+        loadStores();
+        loadItems();
     }, []);
 
-
+    
     const createStore = async () => {
-      if (!newStore.trim()) return;
+        if (!newStore.trim()) return;//stores cant be made with no input or empty spaces
 
-      await fetch(`${API}/stores.php`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newStore }),
-      });
+        await fetch(`${API}/stores.php`, {//sends the request to the backend
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: newStore }),
+        });
 
-      setNewStore("");
-      loadStores();
+        setNewStore("");//clears input field
+        loadStores();//refreshes stores
     };
 
     const deleteStore = async (id) => {
-      await fetch(`${API}/stores.php?id=${id}`, {
-        method: "DELETE",
-      });
+        await fetch(`${API}/stores.php?id=${id}`, {//deletes the store with the same id
+            method: "DELETE",
+        });
 
-      setSelectedStore("");
+        setSelectedStore("");//removes that store from selection
 
-      loadStores();
-      loadItems();
+        loadStores();//refresh stores and items list
+        loadItems();
     };
 
     const createItem = async () => {
-      if (!itemName.trim() || !selectedStore) return;
+        if (!itemName.trim()) return;//if item attempted to be created doesnt have a name return
 
-      await fetch(`${API}/items.php?store_id=${selectedStore}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: itemName,
-          quantity: itemQty,
-        }),
-      });
+        await fetch(`${API}/items.php?store_id=${selectedStore}`, {//id in url goes to backend to be posted
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: itemName,
+              quantity: itemQty,
+            }),
+        });
 
-      setItemName("");
-      setItemQty(1);
-      loadItems();
+        setItemName("");//reset form refresh list
+        setItemQty(1);
+        loadItems();
     };
 
     const toggleChecked = async (item) => {
-      const newChecked = Number(item.checked) === 1 ? 0 : 1;
+        let newChecked;
 
-      await fetch(`${API}/items.php?id=${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          checked: newChecked,
-        }),
-      });
+        if (Number(item.checked) === 1) {//flips checkbox value
+            newChecked = 0;
+        } else {
+            newChecked = 1;
+        }
 
-      await fetch(`${API}/items.php?id=${item.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: item.name,
-          quantity: item.quantity,
-          checked: newChecked,
-          store_id: item.store_id
-        }),
-      });
+        await fetch(`${API}/items.php?id=${item.id}`, {//uses fetch to put the edited item
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: item.name,
+                quantity: item.quantity,
+                checked: newChecked,
+                store_id: item.store_id
+            }),
+        });
 
-      loadItems();
+        loadItems();
     };
 
-    const deleteItem = async (id) => {
-      await fetch(`${API}/items.php?id=${id}`, {
-        method: "DELETE",
-      });
+    const deleteItem = async (id) => {//deletes item with the correct id
+        await fetch(`${API}/items.php?id=${id}`, {
+            method: "DELETE",
+        });
 
-      loadItems();
+        loadItems();//refreshes item list
     };
     
-    const startEdit = (item) => {
+    const startEdit = (item) => {//item is copied in order to be edited
         setEditItem({
             id: item.id,
             name: item.name,
@@ -114,11 +113,11 @@ export default function App() {
         });
     };
     
-    const cancelEdit = () => {
+    const cancelEdit = () => {//when editing is canceled current edited item is set to null
         setEditItem(null);
     };
     
-    const saveEdit = async () => {
+    const saveEdit = async () => {//when edits are done the item edits are put and saved over the original
         await fetch(`${API}/items.php?id=${editItem.id}`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
@@ -130,126 +129,129 @@ export default function App() {
             }),
         });
 
-        cancelEdit();
-        loadItems();
+        cancelEdit();//edited item is cleared
+        loadItems();//item list refreshed
     };
 
 
     return (
         <div className="container py-4">
 
-            <h2 className="mb-4">Shopping List</h2>
-
-            <div className="card p-3 mb-3">
-                <h5>Add Store</h5>
-                <div className="d-flex gap-2">
-                    <input className="form-control" placeholder="Store name" value={newStore} onChange={(e) => setNewStore(e.target.value)}/>
-                    <button className="btn btn-primary" onClick={createStore}>
-                    Add
-                    </button>
-                </div>
-            </div>
-
-            <div className="card p-3 mb-3">
-                <h5>Add Item</h5>
-
-                <select className="form-select mb-2" value={selectedStore}onChange={(e) => setSelectedStore(e.target.value)}>
-                    <option value="">Select a Store</option>
-                    {stores.map((s) => (
-                        <option key={s.id} value={s.id}>
-                            {s.name}
-                        </option>
-                    ))}
-                </select>
-
-                <div className="d-flex gap-2">
-
-                <input className="form-control" placeholder="Item name" value={itemName} onChange={(e) => setItemName(e.target.value)}/>
-
-                <input type="number" className="form-control" value={itemQty} onChange={(e) => setItemQty(e.target.value)} style={{ maxWidth: "100px" }}/>
-
-                <button className="btn btn-success" onClick={createItem}>Add</button>
-                </div>
-
-                <div className="mt-2 d-flex justify-content-end">
-                    {selectedStore && (
-                        <button className="btn btn-sm btn-danger" onClick={() => deleteStore(selectedStore)}>
-                          Delete Selected Store
-                        </button>
-                    )}
-                </div>
-            </div>
-
-            <div className="card p-3">
-                <h5>Shopping List: </h5>
-
-                {items.map((item) => (
-                <div key={item.id} className="border-bottom py-2">
-
-                    {editItem?.id === item.id ? (
-                        <div className="d-flex gap-2 align-items-center">
-
-                            <input className="form-control" value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}/>
-
-                            <input type = "number" className = "form-control" style = {{ maxWidth: "100px" }} value = {editItem.quantity} onChange = {(e) => setEditItem({ ...editItem, quantity: e.target.value })}/>
-
-                            <select className="form-select" value={editItem.store_id} onChange={(e) => setEditItem({ ...editItem, store_id: e.target.value })} >
-                              <option value="">Select store</option>
-                                {stores.map((s) => (
-                                    <option key={s.id} value={s.id}>{s.name}</option>
-                                ))}
-                            </select>
-
-                            <button className="btn btn-success btn-sm" onClick={saveEdit}>
-                                Save
-                            </button>
-
-                            <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
-                              Cancel
+            
+            <h2 className="mb-4">Fantastical Computerized Shopping List</h2>
+            <div className="row mb-3">
+                <div className="col-md-6">
+                    <div className="card p-3 h-100">
+                        <h5>Create A New Store</h5>
+                        <div className="d-flex gap-2">
+                            <input className="form-control" placeholder="Store name" value={newStore} onChange={(e) => setNewStore(e.target.value)}/>
+                            <button className="btn btn-success" onClick={createStore}>
+                            Add
                             </button>
                         </div>
-                  ) : (
-                    <div className="d-flex justify-content-between align-items-center">
+                    </div>
+                </div>
+                <div className="col-md-6">
+                    <div className="card p-3 h-100">
+                        <h5>Add Item To Shopping List</h5>
 
-                        <div>
-                            <input
-                              type="checkbox"
-                              className="form-check-input me-2"
-                              checked={Number(item.checked) === 1}
-                              onChange={() => toggleChecked(item)}
-                            />
-
-                            <span
-                                style={{
-                                    textDecoration:
-                                        Number(item.checked) === 1 ? "line-through" : "none",
-                                }}
-                            >
-                                {item.name} ({item.quantity})
-                            </span>
-
-                            <small className="text-muted ms-2">
-                                Store: {item.store_name} | Date:{" "}
-                                {new Date(item.created_at).toLocaleDateString()}
-                            </small>
-                        </div>
+                        <select className="form-select mb-2" value={selectedStore}onChange={(e) => setSelectedStore(e.target.value)}>
+                            <option value="">Select a Store</option>
+                            {stores.map((s) => (
+                                <option key={s.id} value={s.id}>
+                                    {s.name}
+                                </option>
+                            ))}
+                        </select>
 
                         <div className="d-flex gap-2">
-                            <button className="btn btn-sm btn-outline-secondary" onClick={() => startEdit(item)}>
-                                Edit
-                            </button>
 
-                            <button className="btn btn-sm btn-outline-danger" onClick={() => deleteItem(item.id)}>
-                                Remove
-                            </button>
+                        <input className="form-control" placeholder="Item name" value={itemName} onChange={(e) => setItemName(e.target.value)}/>
+
+                        <input type="number" className="form-control" value={itemQty} onChange={(e) => setItemQty(e.target.value)} style={{ maxWidth: "100px" }}/>
+
+                        <button className="btn btn-success" onClick={createItem}>Add</button>
                         </div>
 
+                        <div className="mt-2 d-flex justify-content-end">
+                            {selectedStore && (
+                                <button className="btn btn-sm btn-danger" onClick={() => deleteStore(selectedStore)}>
+                                  Delete Selected Store
+                                </button>
+                            )}
+                        </div>
                     </div>
-                  )}
                 </div>
-              ))}
+            </div>
+                <div className="card p-3">
+                    <h5>Shopping List: </h5>
+
+                    {items.map((item) => (
+                    <div key={item.id} className="border-bottom py-2">
+
+                        {editItem?.id === item.id ? (
+                            <div className="d-flex gap-2 align-items-center">
+
+                                <input className="form-control" value={editItem.name} onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}/>
+
+                                <input type = "number" className = "form-control" style = {{ maxWidth: "100px" }} value = {editItem.quantity} onChange = {(e) => setEditItem({ ...editItem, quantity: e.target.value })}/>
+
+                                <select className="form-select" value={editItem.store_id} onChange={(e) => setEditItem({ ...editItem, store_id: e.target.value })} >
+                                  <option value="">Select store</option>
+                                    {stores.map((s) => (
+                                        <option key={s.id} value={s.id}>{s.name}</option>
+                                    ))}
+                                </select>
+
+                                <button className="btn btn-success btn-sm" onClick={saveEdit}>
+                                    Save
+                                </button>
+
+                                <button className="btn btn-secondary btn-sm" onClick={cancelEdit}>
+                                  Cancel
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="d-flex justify-content-between align-items-center">
+
+                                <div>
+                                    <input
+                                      type="checkbox"
+                                      className="form-check-input me-2"
+                                      checked={Number(item.checked) === 1}
+                                      onChange={() => toggleChecked(item)}
+                                    />
+
+                                    <span
+                                        style={{
+                                            textDecoration:
+                                                Number(item.checked) === 1 ? "line-through" : "none",
+                                        }}
+                                    >
+                                        {item.name} ({item.quantity})
+                                    </span>
+
+                                    <small className="text-muted ms-2">
+                                        Store: {item.store_name} | Date:{" "}
+                                        {new Date(item.created_at).toLocaleDateString()}
+                                    </small>
+                                </div>
+
+                                <div className="d-flex gap-2">
+                                    <button className="btn btn-sm btn-outline-secondary" onClick={() => startEdit(item)}>
+                                        Edit
+                                    </button>
+
+                                    <button className="btn btn-sm btn-outline-danger" onClick={() => deleteItem(item.id)}>
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
             </div>
 
-      </div>
+        </div>
   );
 }

@@ -1,42 +1,32 @@
 <?php
 require_once "database.php";
 require_once "models/Store.php";
-
+//headers for interacting with the frontend
 header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
-
+//save the request type 
 $action = $_SERVER['REQUEST_METHOD'];
 
+//get post and delete actions
 if ($action === 'GET') {
-    echo json_encode(list_stores());
+    echo json_encode(get_stores());//converts the php array to json then sends the result to react
     exit;
 }
 
-if ($action === 'POST') {
+if ($action === 'POST') {//takess the raw request and converts it to json
     $data = json_decode(file_get_contents("php://input"), true);
 
-    if (!isset($data['name']) || trim($data['name']) === '') {
-        http_response_code(400);
-        echo json_encode(["error" => "Store name required"]);
-        exit;
-    }
+    $store = new Store(null, $data['name']);//create a new store object, database assigns the ID
+    insert_store($store);//writes it to the database
 
-    $store = new Store(null, $data['name']);
-    insert_store($store);
-
-    echo json_encode(["success" => true]);
+    echo json_encode(["success" => true]);//sends success response to frontend
     exit;
 }
 
 if ($action === 'DELETE') {
-    if (!isset($_GET['id'])) {
-        http_response_code(400);
-        echo json_encode(["error" => "Store ID required"]);
-        exit;
-    }
 
     delete_store($_GET['id']);
 
